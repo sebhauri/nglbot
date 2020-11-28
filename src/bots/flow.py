@@ -33,8 +33,9 @@ def start(update: Update, context: CallbackContext) -> State:
     )
     return State.START
 
-def error_response(update: Update, context: CallbackContext) -> State:
+def error_response(update: Update, context: CallbackContext) -> int:
     update.message.reply_text("Something went wrong, please start over with /start")
+    return ConversationHandler.END
 
 def sleep_response(update: Update, context: CallbackContext) -> State:
     update.message.reply_text("Use /start to start planning an event")
@@ -43,7 +44,7 @@ def sleep_response(update: Update, context: CallbackContext) -> State:
 def start_response(update: Update, context: CallbackContext) -> State:
     if  update.effective_message.text == 'No :(':
         update.message.reply_text("Sorry to see you go :(")
-        return State.SLEEP
+        return ConversationHandler.END
     elif update.effective_message.text == 'Yes !':
         update.message.reply_text("Propose a date (format : dd/mm)")
         return State.DATE
@@ -59,7 +60,7 @@ def date_bis_response(update : Update, context : CallbackContext) ->State:
     else:
         text = update.effective_message.text
         try:
-            date = datetime.datetime.strotime(text, '%d.%m.%Y')
+            date = datetime.datetime.strptime(text, '%d.%m.%Y')
             # TODO save date
         except ValueError as error:
             # handle error
@@ -90,7 +91,3 @@ def main() -> None:
     #START/STOP
     updater.start_polling()
     updater.idle()
-
-
-if __name__ == '__main__':
-    main()

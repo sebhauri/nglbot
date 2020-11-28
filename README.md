@@ -4,4 +4,5 @@ The ultimate bot to organize your next event ! Decide a date, invite people and 
 
 # Requirements
 
+- Python Telegram Bot: `pip install python-telegram-bot`
 - Pony ORM: `pip install pony'
