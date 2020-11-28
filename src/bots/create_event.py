@@ -32,11 +32,12 @@ class State(Enum):
 
 # Entry point of the conversation 
 def start(update: Update, context: CallbackContext) -> State:
-    button = [["Yes !", "No :("]]
-    update.message.reply_text(
-        "Welcome ! Would you like to create an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
-    )
-    return State.START
+    if update.effective_chat.type == 'private':
+        button = [["Yes !", "No :("]]
+        update.message.reply_text(
+            "Welcome ! Would you like to create an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
+        )
+        return State.START
 
 # Cancel
 def cancel(update: Update, context: CallbackContext) -> State:
@@ -77,7 +78,7 @@ def date_response(update: Update, context: CallbackContext) -> State:
             date = datetime.datetime.strptime(text, '%d.%m.%Y')
             context.user_data['dates'].append(date)
             button = [["Done"]]
-            update.message.reply_text("Type a new date if you want to add another one or type \"Done\" to go to the next step", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
+            update.message.reply_text("Type a new date if you want to add another one or press \"Done\" to go to the next step", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
             return State.DATE
         except ValueError as _:
             update.message.reply_text("Please... use the format dd.mm.yyyy to give me a date !")
@@ -120,4 +121,3 @@ def register(dispatcher: Dispatcher):
         State.LOCATION : [MessageHandler(Filters.text & (~Filters.command), location_response)],
         State.VALIDATION : [MessageHandler(Filters.text & (~Filters.command), validation_response)]
         }, [CommandHandler('cancel', cancel), MessageHandler(Filters.all, error_response)]))
-        

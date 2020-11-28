@@ -35,3 +35,9 @@ def group_start(update: Update, context: CallbackContext) -> State:
 
 def register(dispatcher: Dispatcher):
     dispatcher.add_handler(ConversationHandler([CommandHandler('groupstart', group_start)], {}, []))
+
+def kick_off(update: Update, context: CallbackContext) -> None:
+    if update.effective_chat.type != 'group':
+        return None
+    else:
+        ...
