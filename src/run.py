@@ -6,12 +6,11 @@ from models.event import Event
 from models.poll import Poll
 from models.guest import Guest
 
-from bots.flow import main
+from bots.create_event import main
 
 def run():
   main()
   
-
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser(description='Angelo starts his service')
