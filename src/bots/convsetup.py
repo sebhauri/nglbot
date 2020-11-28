@@ -9,7 +9,6 @@ import yaml
 with open("config/secrets.yml") as file:
     secrets = yaml.load(file, Loader=yaml.FullLoader)
     TOKEN = secrets['development']['API_TOKEN']
-    print(TOKEN)
 
 def main() -> None:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
