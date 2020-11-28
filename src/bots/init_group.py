@@ -36,8 +36,12 @@ def group_start(update: Update, context: CallbackContext) -> State:
 def register(dispatcher: Dispatcher):
     dispatcher.add_handler(ConversationHandler([CommandHandler('groupstart', group_start)], {}, []))
 
-def kick_off(update: Update, context: CallbackContext) -> None:
+def kick_out(update: Update, context: CallbackContext) -> None:
     if update.effective_chat.type != 'group':
         return None
     else:
-        ...
+        button = [["I'm in !", "I'm out !"]]
+        update.message.reply_text("Will you be in this event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
+        if (update.effective_message.text == "I'm out") :
+            update.effective_chat.kick_member(user_id=update.effective_message.from_user.id)
+            return
