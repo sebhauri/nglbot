@@ -76,6 +76,12 @@ def query_event(event_id: str):
         'organizer' : 'unknown4048'
     }
 
+def kick_off(update: Update, context: CallbackContext) -> None:
+    if update.effective_chat.type != 'group':
+        return None
+    else:
+        ...
+
 def register(dispatcher: Dispatcher):
     dispatcher.add_handler(ConversationHandler([CommandHandler('groupstart', group_start)], {
         State.VOTING : [CommandHandler('closepoll', close_poll)],

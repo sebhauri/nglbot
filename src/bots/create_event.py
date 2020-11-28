@@ -18,6 +18,10 @@ from enum import Enum
 import logging
 import datetime
 
+from pony.orm import *
+from models.event import Event
+from models.poll import Poll
+
 class State(Enum):
     START = 0
     NAME = 1
@@ -28,11 +32,12 @@ class State(Enum):
 
 # Entry point of the conversation 
 def start(update: Update, context: CallbackContext) -> State:
-    button = [["Yes !", "No :("]]
-    update.message.reply_text(
-        "Welcome ! Would you like to create an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
-    )
-    return State.START
+    if update.effective_chat.type == 'private':
+        button = [["Yes !", "No :("]]
+        update.message.reply_text(
+            "Welcome ! Would you like to create an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
+        )
+        return State.START
 
 # Cancel
 def cancel(update: Update, context: CallbackContext) -> State:
@@ -57,6 +62,7 @@ def start_response(update: Update, context: CallbackContext) -> State:
 # NAME
 def name_response(update: Update, context: CallbackContext) -> State:
     name = update.effective_message.text
+    context.user_data['uuid'] = update.effective_user.id
     context.user_data['name'] = name
     context.user_data['dates'] = []
     update.message.reply_text("Propose a date (format : dd.mm.yyyy)")
@@ -73,7 +79,7 @@ def date_response(update: Update, context: CallbackContext) -> State:
             date = datetime.datetime.strptime(text, '%d.%m.%Y')
             context.user_data['dates'].append(date)
             button = [["Done"]]
-            update.message.reply_text("Type a new date if you want to add another one or type \"Done\" to go to the next step", reply_markup=ReplyKeyboardMarkup(button))
+            update.message.reply_text("Type a new date if you want to add another one or press \"Done\" to go to the next step", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
             return State.DATE
         except ValueError as _:
             update.message.reply_text("Please... use the format dd.mm.yyyy to give me a date !")
@@ -84,18 +90,26 @@ def location_response(update: Update, context: CallbackContext) -> State:
     location = update.effective_message.text
     context.user_data['location'] = location
     button = [["Continue", "Abort"]]
-    update.message.reply_text("Ok, here is a little recap for you : \n Your event is name : \n The date of your event is (are) : {}\n The location of your event is :{}")
+    update.message.reply_text("""Ok, here is a little recap for you : \n 
+                                 Your event is name : {}\n 
+                                 The date of your event is (are) : {}\n 
+                                 The location of your event is :{}""")
     update.message.reply_text("Are you sur you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
     return State.VALIDATION
 
 # VALIDATION: abort or commit the event
+@db_session
 def validation_response(update: Update, context: CallbackContext) -> State:
     if update.effective_message.text == 'Continue':
         # save the event to the database
+        event = Event(name = context.user_data['name'], user_uuid=context.user_data['uuid'])
+        poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event)
+        commit()
         return State.GUESTLIST
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END
+        
 
 def register(dispatcher: Dispatcher):
     # Register handlers
