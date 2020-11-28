@@ -31,7 +31,7 @@ TOKEN = '1432985981:AAHxLzTlnqVH8uo20PPuhDFSqbWqp6hBlJw'
 def start(update: Update, context: CallbackContext) -> State:
     button = [["Yes !", "No :("]]
     update.effective_message.reply_text(
-        "Welcome ! Would you like to creat an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
+        "Welcome ! Would you like to create an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
     )
     return State.START
 
@@ -57,7 +57,7 @@ def date_response(update: Update, context: CallbackContext) -> State:
 
 def date_bis_response(update : Update, context : CallbackContext) ->State:
     if update.effective_message.text == 'Done':
-        update.replay_text("You may now want to chose a location for your event, just type it for me...")
+        update.message.reply_text("You may now want to chose a location for your event, just type it for me...")
         return State.LOCATION
     else:
         text = update.effective_message.text
@@ -71,17 +71,17 @@ def date_bis_response(update : Update, context : CallbackContext) ->State:
         return State.DATE_BIS
 
 def location_response(update: Update, context: CallbackContext) ->State:
-    button [["Continue", "Abort"]]
-    update.reply_text("Ok, here is a little recap for you : \n Your event is name : {}\n The date of your event is (are) : {}\n The location of your event is : {}")
-    update.reply_text("Are you sur you want to continue ?")
+    button = [["Continue", "Abort"]]
+    update.message.reply_text("Ok, here is a little recap for you : \n Your event is name : {}\n The date of your event is (are) : {}\n The location of your event is : {}")
+    update.message.reply_text("Are you sur you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
     return State.VALIDATION
 
 def validation_response(update: Update, context: CallbackContext) ->State:
     if update.effective_message.text == 'Continue':
         return State.GUESTLIST
     elif update.effective_message.text == 'Abort':
-        update.reply_text("OK, see you xoxo")
-        return State.SLEEP
+        update.message.reply_text("OK, see you xoxo")
+        return ConversationHandler.END
 
 
 
