@@ -5,6 +5,7 @@ from telegram.ext import (
     ConversationHandler,
     Filters,
     CallbackContext,
+    Dispatcher
 )
 
 from telegram import (
@@ -23,8 +24,6 @@ class State(Enum):
     LOCATION = 2
     VALIDATION = 3
     GUESTLIST = 4
-
-TOKEN = '1432985981:AAHxLzTlnqVH8uo20PPuhDFSqbWqp6hBlJw'
 
 # Entry point of the conversation 
 def start(update: Update, context: CallbackContext) -> State:
@@ -81,21 +80,11 @@ def validation_response(update: Update, context: CallbackContext) -> State:
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END
 
-
-def main() -> None:
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
-    updater = Updater(TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-
+def register(dispatcher: Dispatcher):
     # Register handlers
     dispatcher.add_handler(ConversationHandler([CommandHandler('start', start)], {  
         State.START : [MessageHandler(Filters.text, start_response)],
         State.DATE : [MessageHandler(Filters.text, date_response)],
         State.LOCATION : [MessageHandler(Filters.text, location_response)],
         State.VALIDATION : [MessageHandler(Filters.text, validation_response)]
-        } , [MessageHandler(Filters.text, error_response)]))
-
-
-    # START/STOP
-    updater.start_polling()
-    updater.idle()
+    } , [MessageHandler(Filters.text, error_response)]))

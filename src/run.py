@@ -6,7 +6,7 @@ from models.event import Event
 from models.poll import Poll
 from models.guest import Guest
 
-from bots.create_event import main
+from bots.convsetup import main
 
 def run():
   main()
