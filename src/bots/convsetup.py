@@ -4,10 +4,15 @@ import bots.init_group
 
 from telegram.ext import Updater
 
-TOKEN = '1432985981:AAHxLzTlnqVH8uo20PPuhDFSqbWqp6hBlJw'
+import yaml
+
+with open("config/secrets.yml") as file:
+    secrets = yaml.load(file, Loader=yaml.FullLoader)
+    TOKEN = secrets['development']['API_TOKEN']
+    print(TOKEN)
 
 def main() -> None:
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
