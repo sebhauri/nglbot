@@ -81,10 +81,15 @@ def query_event(event_uuid: str) -> Event:
 def query_poll(event: Event) -> Poll:
     return Poll.get(event=event.id) # TODO filtering on event might not be sufficient
 
-def kick_off(update: Update, context: CallbackContext) -> None:
+def kick_out(update: Update, context: CallbackContext) -> None:
     if update.effective_chat.type != 'group':
         return None
     else:
+        button = [["I'm in !", "I'm out !"]]
+        update.message.reply_text("Will you be in this event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
+        if (update.effective_message.text == "I'm out") :
+            update.effective_chat.kick_member(user_id=update.effective_message.from_user.id)
+            return
         ...
 
 def register(dispatcher: Dispatcher):
