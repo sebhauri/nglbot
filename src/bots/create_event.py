@@ -48,7 +48,6 @@ def error_response(update: Update, context: CallbackContext) -> int:
     update.message.reply_text("Something went wrong, please start over with /start")
     return ConversationHandler.END
 
-
 # START
 def start_response(update: Update, context: CallbackContext) -> State:
     if  update.effective_message.text == 'No :(':
@@ -89,8 +88,12 @@ def location_response(update: Update, context: CallbackContext) -> State:
     location = update.effective_message.text
     context.user_data['location'] = location
     button = [["Continue", "Abort"]]
-    update.message.reply_text("Ok, here is a little recap for you : \n Your event is name : \n The date of your event is (are) : {}\n The location of your event is :{}")
-    update.message.reply_text("Are you sur you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
+    summary = "Ok, here is a little recap for you:\n"
+    summary += f"Your event's name {context.user_data['name']}\n"
+    summary += f"Your location is {context.user_data['location']}\n"
+    summary += "Your dates are:\n"
+    for date in context.user_data['dates']: summary += f"- {date.strftime('%d %b %Y')}\n"
+    update.message.reply_text(summary + "\nAre you sur you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
     return State.VALIDATION
 
 # VALIDATION: abort or commit the event
@@ -98,19 +101,14 @@ def location_response(update: Update, context: CallbackContext) -> State:
 def validation_response(update: Update, context: CallbackContext) -> State:
     if update.effective_message.text == 'Continue':
         # save the event to the database
+        dates = [date.strftime("%d %b %Y") for date in context.user_data['dates']]
         event = Event(name = context.user_data['name'], user_uuid=context.user_data['uuid'])
-        poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event)
+        poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event, options=dates)
         commit()
         return State.GUESTLIST
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END
-
-
-def kick_off(update: Update, context: CallbackContext) -> None:
-    if update.effective_chat.type != 'group':
-        return
-    else:
         
 
 def register(dispatcher: Dispatcher):
