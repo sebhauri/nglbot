@@ -46,6 +46,7 @@ def start_response(update: Update, context: CallbackContext) -> State:
         return ConversationHandler.END
     elif update.effective_message.text == 'Yes !':
         context.user_data['dates'] = []
+        context.user_data['location'] = []
         update.message.reply_text("Propose a date (format : dd/mm/yyyy)")
         return State.DATE
 
@@ -66,8 +67,10 @@ def date_response(update: Update, context: CallbackContext) -> State:
 
 
 def location_response(update: Update, context: CallbackContext) -> State:
+    location = update.effective_message.text
+    context.user_data['location'].append(location)
     button = [["Continue", "Abort"]]
-    update.message.reply_text("Ok, here is a little recap for you : \n Your event is name : \n The date of your event is (are) : {}\n The location of your event is :".format(context.user_data['dates']))
+    update.message.reply_text("Ok, here is a little recap for you : \n Your event is name : \n The date of your event is (are) : {}\n The location of your event is :{}".format(context.user_data['dates'], context.user_data['location']))
     update.message.reply_text("Are you sur you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
     return State.VALIDATION
 
