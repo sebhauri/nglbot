@@ -79,7 +79,7 @@ def date_response(update: Update, context: CallbackContext) -> State:
             date = datetime.datetime.strptime(text, '%d.%m.%Y')
             context.user_data['dates'].append(date)
             button = [["Done"]]
-            update.message.reply_text("Type a new date if you want to add another one or type \"Done\" to go to the next step", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
+            update.message.reply_text("Type a new date if you want to add another one or press \"Done\" to go to the next step", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
             return State.DATE
         except ValueError as _:
             update.message.reply_text("Please... use the format dd.mm.yyyy to give me a date !")
@@ -90,7 +90,10 @@ def location_response(update: Update, context: CallbackContext) -> State:
     location = update.effective_message.text
     context.user_data['location'] = location
     button = [["Continue", "Abort"]]
-    update.message.reply_text("Ok, here is a little recap for you : \n Your event is name : \n The date of your event is (are) : {}\n The location of your event is :{}")
+    update.message.reply_text("""Ok, here is a little recap for you : \n 
+                                 Your event is name : {}\n 
+                                 The date of your event is (are) : {}\n 
+                                 The location of your event is :{}""")
     update.message.reply_text("Are you sur you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
     return State.VALIDATION
 
@@ -106,13 +109,6 @@ def validation_response(update: Update, context: CallbackContext) -> State:
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END
-
-
-def kick_off(update: Update, context: CallbackContext) -> None:
-    if update.effective_chat.type != 'group':
-        return None
-    else:
-        ...
         
 
 def register(dispatcher: Dispatcher):
