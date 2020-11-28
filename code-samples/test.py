@@ -1,7 +1,7 @@
 import requests
 import json
 
-URL = "https://api.telegram.org/bot1432985981:AAHxLzTlnqVH8uo20PPuhDFSqbWqp6hBlJw/"
+URL = "https://api.telegram.org/bot1346233381:AAGmdBV73lNq_5DegkXvFMX4n687SqwrdtA/"
 
 def query(action, params={}, method="GET"):
     r = None
@@ -35,8 +35,8 @@ def sendPic(user):
 
 
 def main():
-    send("Yolo", "476757080") # @username does not seem to work, why ?
-    #get_info()
-    #get_updates()
+    send("Yolo", "643770198") # @username does not seem to work, why ?
+    get_info()
+    get_updates()
 
 main()
