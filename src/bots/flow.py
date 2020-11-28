@@ -23,6 +23,8 @@ class State(Enum):
     DATE = 2
     DATE_BIS = 3
     LOCATION = 4
+    VALIDATION = 5
+    GUESTLIST = 6
 
 TOKEN = '1432985981:AAHxLzTlnqVH8uo20PPuhDFSqbWqp6hBlJw'
 
@@ -68,7 +70,17 @@ def date_bis_response(update : Update, context : CallbackContext) ->State:
         return State.DATE_BIS
 
 def location_response(update: Update, context: CallbackContext) ->State:
-    ...
+    button [["Continue", "Abort"]]
+    update.reply_text("Ok, here is a little recap for you : \n Your event is name : {}\n The date of your event is (are) : {}\n The location of your event is : {}")
+    update.reply_text("Are you sur you want to continue ?")
+    return State.VALIDATION
+
+def validation_response(update: Update, context: CallbackContext) ->State:
+    if update.effective_message.text == 'Continue':
+        return State.GUESTLIST
+    elif update.effective_message.text == 'Abort':
+        update.reply_text("OK, see you xoxo")
+        return State.SLEEP
 
 
 
@@ -83,7 +95,8 @@ def main() -> None:
         State.START : [MessageHandler(Filters.text, start_response)],
         State.DATE : [MessageHandler(Filters.text, date_response)],
         State.DATE_BIS : [MessageHandler(Filters.text, date_bis_response)],
-        State.LOCATION : [MessageHandler(Filters.text, location_response)]
+        State.LOCATION : [MessageHandler(Filters.text, location_response)],
+        State.VALIDATION : [MessageHandler(Filters.text, validation_response)]
         } , [MessageHandler(Filters.text, error_response)]))
 
 
