@@ -60,12 +60,14 @@ def date_bis_response(update : Update, context : CallbackContext) ->State:
         update.replay_text("You may now want to chose a location for your event, just type it for me...")
         return State.LOCATION
     else:
-        text = update.effective_message.text
+        text = update.effective_message.text + "/2020"
         try:
-            date = datetime.datetime.strptime(text, '%d.%m.%Y')
+            date = datetime.datetime.strptime(text, '%d/%m/%Y')
             # TODO save date
+            print(date)
         except ValueError as error:
             # handle error
+
             pass
 
         return State.DATE_BIS
