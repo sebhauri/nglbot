@@ -1,7 +1,7 @@
 *.DS_Store
 .vscode
 
-
+src/config/secrets.yml
 development.sqlite
 
 __pycache__
