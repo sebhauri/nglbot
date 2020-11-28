@@ -24,15 +24,16 @@ class State(Enum):
     VALIDATION = 3
     GUESTLIST = 4
 
-TOKEN = '1432985981:AAHxLzTlnqVH8uo20PPuhDFSqbWqp6hBlJw'
+TOKEN = '1361340482:AAHtu5hD-tgRrOROx8K_k6R0I015UlBNRQQ'
 
 # Entry point of the conversation 
 def start(update: Update, context: CallbackContext) -> State:
-    button = [["Yes !", "No :("]]
-    update.effective_message.reply_text(
-        "Welcome ! Would you like to create an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
-    )
-    return State.START
+    if update.effective_chat.type == 'private':
+        button = [["Yes !", "No :("]]
+        update.effective_message.reply_text(
+            "Welcome ! Would you like to create an event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True)
+        )
+        return State.START
 
 # Error handler: exit the conversation
 def error_response(update: Update, context: CallbackContext) -> int:
@@ -47,6 +48,7 @@ def start_response(update: Update, context: CallbackContext) -> State:
     elif update.effective_message.text == 'Yes !':
         context.user_data['dates'] = []
         context.user_data['location'] = []
+        context.user_data['is_unique_date'] = 0
         update.message.reply_text("Propose a date (format : dd/mm/yyyy)")
         return State.DATE
 
@@ -60,6 +62,7 @@ def date_response(update: Update, context: CallbackContext) -> State:
             date = datetime.datetime.strptime(text, '%d/%m/%Y')
             context.user_data['dates'].append(date)
             update.message.reply_text("Type a new date if you want to add another one or type \"Done\" to go to the next step")
+            context.user_data['is_unique_date'] += 1
             return State.DATE
         except ValueError as _:
             update.message.reply_text("Please... use the format dd/mm/yyyy to give me a date !")
@@ -71,7 +74,7 @@ def location_response(update: Update, context: CallbackContext) -> State:
     context.user_data['location'].append(location)
     button = [["Continue", "Abort"]]
     update.message.reply_text("Ok, here is a little recap for you : \n Your event is name : \n The date of your event is (are) : {}\n The location of your event is :{}".format(context.user_data['dates'], context.user_data['location']))
-    update.message.reply_text("Are you sur you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
+    update.message.reply_text("Are you sure you want to continue ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
     return State.VALIDATION
 
 def validation_response(update: Update, context: CallbackContext) -> State:
@@ -81,6 +84,12 @@ def validation_response(update: Update, context: CallbackContext) -> State:
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END
 
+
+def kick_off(update: Update, context: CallbackContext) -> None:
+    if update.effective_chat.type != 'group':
+        return
+    else:
+        
 
 def main() -> None:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
