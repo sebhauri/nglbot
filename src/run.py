@@ -6,7 +6,7 @@ from models.event import Event
 from models.poll import Poll
 from models.guest import Guest
 
-def run(cold=False):
+def run():
   show(Event)
   show(Guest)
   show(Poll)
