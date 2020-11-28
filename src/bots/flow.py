@@ -64,7 +64,6 @@ def date_bis_response(update : Update, context : CallbackContext) ->State:
         try:
             date = datetime.datetime.strptime(text, '%d/%m/%Y')
             # TODO save date
-            print(date)
         except ValueError as error:
             # handle error
 
