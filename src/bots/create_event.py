@@ -5,6 +5,7 @@ from telegram.ext import (
     ConversationHandler,
     Filters,
     CallbackContext,
+    Dispatcher
 )
 
 from telegram import (
@@ -28,8 +29,6 @@ class State(Enum):
     LOCATION = 3
     VALIDATION = 4
     GUESTLIST = 5
-
-TOKEN = '1346233381:AAGmdBV73lNq_5DegkXvFMX4n687SqwrdtA'
 
 # Entry point of the conversation 
 def start(update: Update, context: CallbackContext) -> State:
@@ -108,11 +107,13 @@ def validation_response(update: Update, context: CallbackContext) -> State:
         return ConversationHandler.END
 
 
-def main() -> None:
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
-    updater = Updater(TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-    
+def kick_off(update: Update, context: CallbackContext) -> None:
+    if update.effective_chat.type != 'group':
+        return
+    else:
+        
+
+def register(dispatcher: Dispatcher):
     # Register handlers
     dispatcher.add_handler(ConversationHandler([CommandHandler('start', start)], {  
         State.START : [MessageHandler(Filters.text & (~Filters.command), start_response)],
@@ -121,8 +122,4 @@ def main() -> None:
         State.LOCATION : [MessageHandler(Filters.text & (~Filters.command), location_response)],
         State.VALIDATION : [MessageHandler(Filters.text & (~Filters.command), validation_response)]
         }, [CommandHandler('cancel', cancel), MessageHandler(Filters.all, error_response)]))
-
-
-    # START/STOP
-    updater.start_polling()
-    updater.idle()
+        
