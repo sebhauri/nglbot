@@ -29,7 +29,7 @@ def start(update: Update, context: CallbackContext) -> None:
 def kick(update: Update, context: CallbackContext) -> None:
     if update.message.text == "I'm out !":
         update.effective_chat.kick_member(user_id=update.message.from_user.id)
-    else:
+    elif update.message.text == "I'm in !":
         user_id = update.message.from_user.id
         event_id = context.chat_data['event_id']
         event = Event[event_id]
