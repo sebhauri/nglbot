@@ -23,7 +23,7 @@ from models.guest import Guest
 def start(update: Update, context: CallbackContext) -> None:
     if update.effective_chat.type == 'group':
         button = [["I'm in !", "I'm out !"]]
-        update.message.reply_text("Will you be in this event ?", reply_markup=ReplyKeyboardMarkup(button))
+        update.message.reply_text("Will you be in this event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
 
 @db_session
 def kick(update: Update, context: CallbackContext) -> None:
