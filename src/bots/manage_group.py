@@ -29,8 +29,8 @@ def kick(update: Update, context: CallbackContext) -> None:
         update.effective_chat.kick_member(user_id=update.message.from_user.id)
     else:
         user_id = update.message.from_user.id
-        #TODO add id to db
-
+        event_id = context.chat_data['event_id']
+        Event[event_id].guests.add(user_id)
         
 
 def register(dispatcher: Dispatcher):
