@@ -17,6 +17,7 @@ from telegram import (
 
 from pony.orm import *
 from models.event import Event
+from models.guest import Guest
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -24,13 +25,15 @@ def start(update: Update, context: CallbackContext) -> None:
         button = [["I'm in !", "I'm out !"]]
         update.message.reply_text("Will you be in this event ?", reply_markup=ReplyKeyboardMarkup(button))
 
+@db_session
 def kick(update: Update, context: CallbackContext) -> None:
     if update.message.text == "I'm out !":
         update.effective_chat.kick_member(user_id=update.message.from_user.id)
     else:
         user_id = update.message.from_user.id
         event_id = context.chat_data['event_id']
-        Event[event_id].guests.add(user_id)
+        event = Event[event_id]
+        event.guests.add(Guest(uuid=user_id, event=event))
         
 
 def register(dispatcher: Dispatcher):
