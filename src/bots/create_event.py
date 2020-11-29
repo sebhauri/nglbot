@@ -17,6 +17,7 @@ from enum import Enum
 
 import logging
 import datetime
+import uuid
 
 from pony.orm import *
 from models.event import Event
@@ -103,9 +104,15 @@ def validation_response(update: Update, context: CallbackContext) -> State:
     if update.effective_message.text == 'Continue':
         # save the event to the database
         dates = [date.strftime("%d %b %Y") for date in context.user_data['dates']]
-        event = Event(name = context.user_data['name'], user_uuid=context.user_data['uuid'])
+        event = Event(name = context.user_data['name'], uuid=uuid.uuid4().hex, user_uuid=context.user_data['uuid'])
         poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event, options=dates)
         commit()
+
+        message = "Your event has been created. You may now create a group. "\
+            "The guests as well as this bot should be added to the group. "\
+            "After that, forward the following message to the newly created group."
+        update.message.reply_text(message)
+        update.message.reply_text(f"/groupstart {event.uuid}")
         return State.GUESTLIST
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
