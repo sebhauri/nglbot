@@ -106,7 +106,8 @@ def validation_response(update: Update, context: CallbackContext) -> State:
     if update.effective_message.text == 'Continue':
         # save the event to the database
         dates = [date.strftime("%d %b %Y") for date in context.user_data['dates']]
-        event = Event(name = context.user_data['name'], uuid=uuid.uuid4().hex, user_uuid=context.user_data['uuid'])
+        event = Event(name = context.user_data['name'], uuid=uuid.uuid4().hex,
+            user_uuid=context.user_data['uuid'], location=context.user_data['location'])
         poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event, options=dates)
         commit()
 
