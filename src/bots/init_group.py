@@ -14,6 +14,10 @@ from telegram import (
 )
 
 from enum import Enum
+from pony import orm
+
+from models.event import Event
+from models.poll import Poll
 
 import logging
 import datetime
@@ -30,16 +34,17 @@ def group_start(update: Update, context: CallbackContext) -> State:
         if len(words) <= 1:
             update.message.reply_text('Please specify the event ID')
         else:
-            event_id = words[1]
+            event_uuid = words[1]
+            event = query_event(event_uuid)
 
-            event = query_event(event_id)
+            if event == None:
+                update.message.reply_text(f"Event with ID {event_uuid} does not exist\nPlease try again")
+                return None
+            
+            update.message.reply_text(f'Starting setup of event with id {event_uuid}')
 
-            context.chat_data['event_info'] = event
-            update.message.reply_text(f'Starting setup of event with id {event_id}')
-
-            # TODO get actual event info
-            event_dates = ['05.12.2020', '06.12.2020', '10.12.2020']
-            #event_name = 'Covid party'
+            poll = query_poll(event)
+            event_dates = poll.options
 
             message = context.bot.send_poll(
                 update.effective_chat.id,
@@ -48,18 +53,18 @@ def group_start(update: Update, context: CallbackContext) -> State:
                 is_anonymous=False,
                 allows_multiple_answers=True,
             )
-            # Save some info about the poll the bot_data for later use in receive_poll_answer
-            payload = {
-                message.poll.id: {
-                    "questions": event_dates,
-                    "message_id": message.message_id,
-                    "chat_id": update.effective_chat.id,
-                    "answers": 0,
-                }
-            }
+            # TODO is this necessary ?
+            # payload = {
+            #     message.poll.id: {
+            #         "questions": event_dates,
+            #         "message_id": message.message_id,
+            #         "chat_id": update.effective_chat.id,
+            #         "answers": 0,
+            #     }
+            # }
 
             # TODO poll id should probably be stored on DB
-            context.bot_data.update(payload)
+            # context.bot_data.update(payload)
             return State.VOTING
         pass
     else:
@@ -68,13 +73,13 @@ def group_start(update: Update, context: CallbackContext) -> State:
 def close_poll(update: Update, context: CallbackContext) -> State:
     pass
 
-def query_event(event_id: str):
-    return {
-        'id' : event_id,
-        'name' : 'Test event',
-        'dates' : ['05.12.2020', '06.12.2020', '10.12.2020'],
-        'organizer' : 'unknown4048'
-    }
+@orm.db_session
+def query_event(event_uuid: str) -> Event:
+    return Event.get(uuid=event_uuid)
+
+@orm.db_session
+def query_poll(event: Event) -> Poll:
+    return Poll.get(event=event.id) # TODO filtering on event might not be sufficient
 
 def kick_out(update: Update, context: CallbackContext) -> None:
     if update.effective_chat.type != 'group':
