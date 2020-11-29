@@ -74,6 +74,8 @@ def group_start(update: Update, context: CallbackContext) -> State:
 def close_poll(update: Update, context: CallbackContext) -> State:
     if update.effective_chat.type == 'group':
         button = [["I'm in !", "I'm out !"]]
+        event = Event[context.chat_data['event_id']]
+        update.message.reply_text(f"The event takes place on the {event.date}")
         update.message.reply_text("Will you be in this event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
         return State.CONFIRMING
 
