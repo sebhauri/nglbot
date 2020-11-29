@@ -117,7 +117,14 @@ def validation_response(update: Update, context: CallbackContext) -> State:
             "After that, forward the following message to the newly created group."
         update.message.reply_text(message)
         update.message.reply_text(f"/groupstart {event.uuid}")
-        return State.FINAL_DATE
+
+        if len(dates) == 1:
+            update.message.reply_text("Use /kick in the group chat to ask your guests to confirm their participation")
+            update.message.reply_text("Use /guests here the list of guests that have confirmed their participation")
+            return State.GUESTLIST
+        else:
+            return State.FINAL_DATE
+
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END

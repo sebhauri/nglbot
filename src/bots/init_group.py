@@ -52,22 +52,24 @@ def group_start(update: Update, context: CallbackContext) -> State:
             poll = Poll.get(event=event.id)
             event_dates = poll.options
 
-            message: Message = context.bot.send_poll(
-                update.effective_chat.id,
-                "Are you available at the following dates?",
-                event_dates,
-                is_anonymous=False,
-                allows_multiple_answers=True,
-            )
+            if len(event_dates) == 1:
+                update.message.reply_text("Use /kick to start guest registration")
+            else:
+                message: Message = context.bot.send_poll(
+                    update.effective_chat.id,
+                    "Are you available at the following dates?",
+                    event_dates,
+                    is_anonymous=False,
+                    allows_multiple_answers=True,
+                )
 
-            update.effective_user.send_message("Here is the poll for your event")
-            message.forward(update.effective_user.id)
+                update.effective_user.send_message("Here is the poll for your event")
+                message.forward(update.effective_user.id)
 
-            options = [event_dates]
-            update.effective_user.send_message("Have you made your choice for the date ?", reply_markup=ReplyKeyboardMarkup(options))
+                options = [event_dates]
+                update.effective_user.send_message("Have you made your choice for the date ?", reply_markup=ReplyKeyboardMarkup(options))
             
             return State.VOTING
-        pass
     else:
         update.message.reply_text('This command can only be issued in a group')
 
