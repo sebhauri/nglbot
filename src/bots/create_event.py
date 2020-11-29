@@ -90,7 +90,7 @@ def location_response(update: Update, context: CallbackContext) -> State:
     context.user_data['location'] = location
     button = [["Continue", "Abort"]]
     summary = "Ok, here is a little recap for you:\n"
-    summary += f"Your event's name {context.user_data['name']}\n"
+    summary += f"Your event's name is {context.user_data['name']}\n"
     summary += f"Your location is {context.user_data['location']}\n"
     summary += "Your dates are:\n"
     for date in context.user_data['dates']: summary += f"- {date.strftime('%d %b %Y')}\n"
