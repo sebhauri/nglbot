@@ -115,6 +115,7 @@ def validation_response(update: Update, context: CallbackContext) -> State:
 
         message = "Your event has been created. You may now create a group. "\
             "The guests as well as this bot should be added to the group. "\
+            "Make the bot is an administrator"\
             "After that, forward the following message to the newly created group."
         update.message.reply_text(message)
         update.message.reply_text(f"/groupstart {event.uuid}")
