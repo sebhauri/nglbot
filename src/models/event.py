@@ -10,3 +10,4 @@ class Event(db.Entity):
   user_uuid = Required(int)
   polls = Set('Poll')
   guests = Set('Guest')
+  date = Optional(str)

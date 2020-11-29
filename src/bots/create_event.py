@@ -22,6 +22,7 @@ import uuid
 from pony.orm import *
 from models.event import Event
 from models.poll import Poll
+from models.guest import Guest
 
 class State(Enum):
     START = 0
@@ -29,7 +30,8 @@ class State(Enum):
     DATE = 2
     LOCATION = 3
     VALIDATION = 4
-    GUESTLIST = 5
+    FINAL_DATE = 5
+    GUESTLIST = 6
 
 # Entry point of the conversation 
 def start(update: Update, context: CallbackContext) -> State:
@@ -108,16 +110,45 @@ def validation_response(update: Update, context: CallbackContext) -> State:
         poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event, options=dates)
         commit()
 
+        context.user_data['id'] = event.id
+
         message = "Your event has been created. You may now create a group. "\
             "The guests as well as this bot should be added to the group. "\
             "After that, forward the following message to the newly created group."
         update.message.reply_text(message)
         update.message.reply_text(f"/groupstart {event.uuid}")
-        return State.GUESTLIST
+        return State.FINAL_DATE
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END
-        
+@db_session
+def final_date_response(update: Update, context: CallbackContext) -> State:
+    event = Event[context.user_data['id']]
+    poll = Poll.get(event=event.id, type=Poll.TYPES['dates'])
+
+    text = update.message.text
+
+    if text in poll.options:
+        event.date = text
+        commit()
+        update.message.reply_text(f"The event will take place on {text}")
+        update.message.reply_text("Use /kick in the group chat to ask your guests to confirm their participation")
+        update.message.reply_text("Use /guests here the list of guests that have confirmed their participation")
+        return State.GUESTLIST
+    else:
+        update.message.reply_text("Please try again")
+
+@db_session
+def guests(update: Update, context: CallbackContext) -> State:
+    guests = list(select(g for g in Guest if g.event.id == context.user_data['id']))
+
+    if len(guests) == 0:
+        update.message.reply_text("There are no confirmed guests for now")
+    else:
+        message = f"There are {len(guests)} confirmed guests:"
+        message += '\n'.join([f"- {g.uuid}" for g in guests])
+        update.message.reply_text(message)
+    
 
 def register(dispatcher: Dispatcher):
     # Register handlers
@@ -126,5 +157,7 @@ def register(dispatcher: Dispatcher):
         State.NAME : [MessageHandler(Filters.text & (~Filters.command), name_response)],
         State.DATE : [MessageHandler(Filters.text & (~Filters.command), date_response)],
         State.LOCATION : [MessageHandler(Filters.text & (~Filters.command), location_response)],
-        State.VALIDATION : [MessageHandler(Filters.text & (~Filters.command), validation_response)]
+        State.VALIDATION : [MessageHandler(Filters.text & (~Filters.command), validation_response)],
+        State.FINAL_DATE : [MessageHandler(Filters.text & (~Filters.command), final_date_response)],
+        State.GUESTLIST : [CommandHandler('guests', guests)]
         }, [CommandHandler('cancel', cancel), MessageHandler(Filters.all, error_response)]))

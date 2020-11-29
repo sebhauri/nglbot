@@ -11,6 +11,7 @@ from telegram.ext import (
 from telegram import (
     ReplyKeyboardMarkup,
     Update,
+    Message
 )
 
 from enum import Enum
@@ -37,42 +38,39 @@ def group_start(update: Update, context: CallbackContext) -> State:
             event_uuid = words[1]
             event = query_event(event_uuid)
 
-            context.chat_data['event_id'] = event.id
 
             if event == None:
                 update.message.reply_text(f"Event with ID {event_uuid} does not exist\nPlease try again")
                 return None
+
+            context.chat_data['event_id'] = event.id
             
             update.message.reply_text(f'Starting setup of event with id {event_uuid}')
 
             poll = query_poll(event)
             event_dates = poll.options
 
-            message = context.bot.send_poll(
+            message: Message = context.bot.send_poll(
                 update.effective_chat.id,
                 "Are you available at the following dates?",
                 event_dates,
                 is_anonymous=False,
                 allows_multiple_answers=True,
             )
-            # TODO is this necessary ?
-            # payload = {
-            #     message.poll.id: {
-            #         "questions": event_dates,
-            #         "message_id": message.message_id,
-            #         "chat_id": update.effective_chat.id,
-            #         "answers": 0,
-            #     }
-            # }
 
-            # TODO poll id should probably be stored on DB
-            # context.bot_data.update(payload)
+            update.effective_user.send_message("Here is the poll for your event")
+            message.forward(update.effective_user.id)
+
+            options = [event_dates]
+            update.effective_user.send_message("Have you made your choice for the date ?", reply_markup=ReplyKeyboardMarkup(options))
+            
             return State.VOTING
         pass
     else:
         update.message.reply_text('This command can only be issued in a group')
 
 def close_poll(update: Update, context: CallbackContext) -> State:
+    # TODO should close the poll and enable the I'm in / I'm out
     pass
 
 @orm.db_session
