@@ -37,6 +37,8 @@ def group_start(update: Update, context: CallbackContext) -> State:
             event_uuid = words[1]
             event = query_event(event_uuid)
 
+            context.chat_data['event_id'] = event.id
+
             if event == None:
                 update.message.reply_text(f"Event with ID {event_uuid} does not exist\nPlease try again")
                 return None
