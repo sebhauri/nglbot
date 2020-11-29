@@ -107,7 +107,12 @@ def validation_response(update: Update, context: CallbackContext) -> State:
         event = Event(name = context.user_data['name'], uuid=uuid.uuid4().hex, user_uuid=context.user_data['uuid'])
         poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event, options=dates)
         commit()
-        update.message.reply_text(f"Event ID is {event.uuid}")
+
+        message = "Your event has been created. You may now create a group. "\
+            "The guests as well as this bot should be added to the group. "\
+            "After that, forward the following message to the newly created group."
+        update.message.reply_text(message)
+        update.message.reply_text(f"/groupstart {event.uuid}")
         return State.GUESTLIST
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
