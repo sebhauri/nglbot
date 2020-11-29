@@ -1,7 +1,6 @@
 import logging
 import bots.create_event
 import bots.init_group
-import bots.manage_group
 
 from telegram.ext import Updater
 

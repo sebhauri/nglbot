@@ -64,7 +64,7 @@ def group_start(update: Update, context: CallbackContext) -> State:
             message.forward(update.effective_user.id)
 
             options = [event_dates]
-            update.effective_user.send_message("Have you made your choice for the date ?", reply_markup=ReplyKeyboardMarkup(options))
+            update.effective_user.send_message("Have you made your choice for the date ?", reply_markup=ReplyKeyboardMarkup(options, one_time_keyboard=True))
             
             return State.VOTING
         pass
