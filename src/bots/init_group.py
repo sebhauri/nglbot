@@ -71,6 +71,7 @@ def group_start(update: Update, context: CallbackContext) -> State:
     else:
         update.message.reply_text('This command can only be issued in a group')
 
+@orm.db_session
 def close_poll(update: Update, context: CallbackContext) -> State:
     if update.effective_chat.type == 'group':
         button = [["I'm in !", "I'm out !"]]
