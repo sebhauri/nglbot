@@ -145,8 +145,8 @@ def guests(update: Update, context: CallbackContext) -> State:
     if len(guests) == 0:
         update.message.reply_text("There are no confirmed guests for now")
     else:
-        message = f"There are {len(guests)} confirmed guests:"
-        message += '\n'.join([f"- {g.uuid}" for g in guests])
+        message = f"There are {len(guests)} confirmed guests:\n"
+        message += '\n'.join([f"- {g.username}" for g in guests])
         update.message.reply_text(message)
     
 

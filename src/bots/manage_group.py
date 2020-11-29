@@ -32,8 +32,9 @@ def kick(update: Update, context: CallbackContext) -> None:
     elif update.message.text == "I'm in !":
         user_id = update.message.from_user.id
         event_id = context.chat_data['event_id']
+        username = update.effective_user.username
         event = Event[event_id]
-        event.guests.add(Guest(uuid=user_id, event=event))
+        event.guests.add(Guest(uuid=user_id, event=event, username=username))
         
 
 def register(dispatcher: Dispatcher):

@@ -7,3 +7,4 @@ class Guest(db.Entity):
   id = PrimaryKey(int, auto=True)
   uuid = Required(int)
   event = Required(Event)
+  username = Required(str)
