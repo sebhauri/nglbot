@@ -19,6 +19,7 @@ from pony import orm
 
 from models.event import Event
 from models.poll import Poll
+from models.guest import Guest
 
 import logging
 import datetime
@@ -26,6 +27,7 @@ import datetime
 class State(Enum):
     START = 0
     VOTING = 1
+    CONFIRMING = 2
 
 def group_start(update: Update, context: CallbackContext) -> State:
     if update.effective_chat.type == 'group':
@@ -70,8 +72,21 @@ def group_start(update: Update, context: CallbackContext) -> State:
         update.message.reply_text('This command can only be issued in a group')
 
 def close_poll(update: Update, context: CallbackContext) -> State:
-    # TODO should close the poll and enable the I'm in / I'm out
-    pass
+    if update.effective_chat.type == 'group':
+        button = [["I'm in !", "I'm out !"]]
+        update.message.reply_text("Will you be in this event ?", reply_markup=ReplyKeyboardMarkup(button, one_time_keyboard=True))
+        return State.CONFIRMING
+
+@orm.db_session
+def kick(update: Update, context: CallbackContext) -> None:
+    if update.message.text == "I'm out !":
+        update.effective_chat.kick_member(user_id=update.message.from_user.id)
+    elif update.message.text == "I'm in !":
+        user_id = update.message.from_user.id
+        event_id = context.chat_data['event_id']
+        username = update.effective_user.username
+        event = Event[event_id]
+        event.guests.add(Guest(uuid=user_id, event=event, username=username))
 
 @orm.db_session
 def query_event(event_uuid: str) -> Event:
@@ -83,5 +98,6 @@ def query_poll(event: Event) -> Poll:
 
 def register(dispatcher: Dispatcher):
     dispatcher.add_handler(ConversationHandler([CommandHandler('groupstart', group_start)], {
-        State.VOTING : [CommandHandler('closepoll', close_poll)],
+        State.VOTING : [CommandHandler('kick', close_poll)],
+        State.CONFIRMING : [MessageHandler(Filters.text & (~Filters.command), kick)]
     }, []))

@@ -18,7 +18,7 @@ def main() -> None:
 
     bots.create_event.register(dispatcher)
     bots.init_group.register(dispatcher)
-    bots.manage_group.register(dispatcher)
+    #bots.manage_group.register(dispatcher)
 
     # START/STOP
     updater.start_polling()
