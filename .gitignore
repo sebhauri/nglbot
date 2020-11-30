@@ -2,6 +2,7 @@
 .vscode
 
 src/config/secrets.yml
+src/bots/cool_stuff
 development.sqlite
 
 __pycache__

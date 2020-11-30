@@ -11,3 +11,4 @@ class Event(db.Entity):
   polls = Set('Poll')
   guests = Set('Guest')
   date = Optional(str)
+  location = Required(str)

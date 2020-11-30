@@ -106,7 +106,8 @@ def validation_response(update: Update, context: CallbackContext) -> State:
     if update.effective_message.text == 'Continue':
         # save the event to the database
         dates = [date.strftime("%d %b %Y") for date in context.user_data['dates']]
-        event = Event(name = context.user_data['name'], uuid=uuid.uuid4().hex, user_uuid=context.user_data['uuid'])
+        event = Event(name = context.user_data['name'], uuid=uuid.uuid4().hex,
+            user_uuid=context.user_data['uuid'], location=context.user_data['location'])
         poll = Poll(type=Poll.TYPES['dates'], question="Select the dates you are available", event=event, options=dates)
         commit()
 
@@ -114,10 +115,18 @@ def validation_response(update: Update, context: CallbackContext) -> State:
 
         message = "Your event has been created. You may now create a group. "\
             "The guests as well as this bot should be added to the group. "\
+            "Make the bot is an administrator"\
             "After that, forward the following message to the newly created group."
         update.message.reply_text(message)
         update.message.reply_text(f"/groupstart {event.uuid}")
-        return State.FINAL_DATE
+
+        if len(dates) == 1:
+            update.message.reply_text("Use /kick in the group chat to ask your guests to confirm their participation")
+            update.message.reply_text("Use /guests here the list of guests that have confirmed their participation")
+            return State.GUESTLIST
+        else:
+            return State.FINAL_DATE
+
     elif update.effective_message.text == 'Abort':
         update.message.reply_text("OK, see you xoxo !")
         return ConversationHandler.END
@@ -145,8 +154,9 @@ def guests(update: Update, context: CallbackContext) -> State:
     if len(guests) == 0:
         update.message.reply_text("There are no confirmed guests for now")
     else:
-        message = f"There are {len(guests)} confirmed guests:\n"
-        message += '\n'.join([f"- {g.username}" for g in guests])
+        message = f"There are {len(guests)} confirmed guests"
+
+        # message += '\n'.join([f"- {g.username}" for g in guests])
         update.message.reply_text(message)
     
 
